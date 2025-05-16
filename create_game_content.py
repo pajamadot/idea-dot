@@ -30,9 +30,10 @@ async def generate_twitter_content(video_prompt: str, music_prompt: str) -> str:
     Requirements:
     1. Keep it under 280 characters
     2. Include 3-5 relevant gaming hashtags
-    3. Make it exciting and viral-worthy
-    4. Include a call to action
-    5. Format: Tweet text + hashtags on new line
+    3. Must include #AIGeneratedGameplay tag
+    4. Make it exciting and viral-worthy
+    5. Include a call to action
+    6. Format: Tweet text + hashtags on new line
     """
     
     response = client.chat.completions.create(
