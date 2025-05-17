@@ -23,26 +23,54 @@ async def generate_twitter_content(video_prompt: str, music_prompt: str) -> str:
     client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
     
     prompt = f"""
-    Create an engaging tweet about this game concept:
+    Create a viral-worthy tweet about this innovative game concept:
     Video: {video_prompt}
     Music: {music_prompt}
     
     Requirements:
     1. Keep it under 280 characters
-    2. Include 3-5 relevant gaming hashtags
-    3. Must include #AIGeneratedGameplay tag
-    4. Make it exciting and viral-worthy
-    5. Include a call to action
-    6. Format: Tweet text + hashtags on new line
+    2. Start with a strong visual hook that captures attention
+    3. Create emotional engagement through tension, action, or curiosity
+    4. Include a clear call-to-action (e.g., "Would you play this?", "Drop a ❤️ if you want to try this")
+    5. Add 2-5 relevant emojis to enhance readability and engagement
+    6. Include 4-6 hashtags:
+       - Always include #AIGeneratedGameplay
+       - 1-2 broad gaming tags (e.g., #gamedev, #indiegame)
+       - 1-2 niche/mood tags based on the game's style (e.g., #pixelart, #scifi, #synthwave)
+    7. Format:
+       <Tweet body>
+       <Line break>
+       #hashtags
+
+    Game Concept Guidelines:
+    - Think beyond traditional genres (e.g., not just platformers, RPGs, or shooters)
+    - Consider experimental mechanics like:
+      * Games that blend physical and digital worlds
+      * Social experiments disguised as games
+      * Games that evolve based on player emotions
+      * Games that use real-world data or events
+      * Games that challenge traditional gameplay conventions
+    - Explore unique themes like:
+      * Philosophical concepts
+      * Abstract emotions
+      * Social commentary
+      * Environmental awareness
+      * Cultural experiences
+    - Consider innovative gameplay elements:
+      * Games that require multiple devices
+      * Games that use AI to adapt to players
+      * Games that incorporate real-time world events
+      * Games that blend different art forms
+      * Games that challenge player perceptions
     """
     
     response = client.chat.completions.create(
         model="gpt-4-turbo",
         messages=[
-            {"role": "system", "content": "You are a creative social media manager for a game studio."},
+            {"role": "system", "content": "You are a viral game content strategist and copywriter for an AI-driven game studio. Your expertise lies in creating innovative, boundary-pushing game concepts that challenge traditional gaming norms. You excel at presenting experimental and avant-garde game ideas in an engaging way that makes viewers stop scrolling. You're known for your ability to make unconventional game concepts feel accessible and exciting."},
             {"role": "user", "content": prompt}
         ],
-        temperature=0.7,
+        temperature=0.9,  # Increased temperature for more creative variations
     )
     
     return response.choices[0].message.content.strip()
