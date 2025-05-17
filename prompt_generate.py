@@ -16,37 +16,43 @@ def generate_prompts() -> Tuple[str, str]:
         Tuple[str, str]: A tuple containing (video_prompt, music_prompt)
     """
     # Initialize the OpenAI client
-    # Make sure OPENAI_API_KEY environment variable is set or pass directly
     client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
     
-    # Define the prompt
+    # Define the enhanced prompt
     prompt = """
     Create and return one valid JSON object with exactly two string fields:
 
-    "video_prompt" – a single, compact sentence that will generate a 4‑6 second perfectly looping gameplay video clip, containing (in order, comma‑separated)
-      1️⃣ game genre + core mechanic,
-      2️⃣ environment/setting (terrain, weather, time‑of‑day, mood),
-      3️⃣ main character appearance & motion (silhouette, outfit, current animation pose),
-      4️⃣ up to three key enemies or interactive objects and what they're doing,
-      5️⃣ gameplay moment unfolding right now,
-      6️⃣ cinematic camera move,
-      7️⃣ art style & render look,
-      8️⃣ lighting & colour palette,
-      9️⃣ UI/HUD elements in frame,
-      🔟 video specs & tags (e.g., "4 K 60 fps, 16:9, seamless loop, highly detailed, trending on ArtStation, cinematic depth of field").
+    "video_prompt" – a single, compact sentence that will generate a 4‑6 second perfectly looping gameplay video clip. The prompt should be highly creative and unique, containing (in order, comma‑separated):
+      1️⃣ game genre + innovative core mechanic (e.g., "gravity-shifting platformer" or "time-bending stealth"),
+      2️⃣ unique environment/setting with specific mood and atmosphere (e.g., "bioluminescent underwater ruins" or "floating islands in a storm"),
+      3️⃣ distinctive main character with unique abilities (e.g., "shapeshifting shadow mage" or "mechanical dragon rider"),
+      4️⃣ creative enemies/obstacles with unique behaviors (e.g., "mirror-image doppelgangers" or "living architecture"),
+      5️⃣ dynamic gameplay moment with special effects (e.g., "character splits into three time-clones" or "environment morphs between seasons"),
+      6️⃣ cinematic camera move that enhances the action (e.g., "dramatic slow-mo zoom" or "dynamic orbit shot"),
+      7️⃣ distinctive art style with unique visual elements (e.g., "hand-painted watercolor" or "neon-noir cyberpunk"),
+      8️⃣ creative lighting & color palette that sets the mood (e.g., "aurora borealis lighting" or "monochrome with selective color"),
+      9️⃣ minimal but stylish HUD elements (e.g., "floating holographic displays" or "environment-integrated UI"),
+      🔟 video specs & artistic direction (e.g., "4K 60fps, 16:9, seamless loop, highly detailed, trending on ArtStation, cinematic depth of field").
 
-    "music_prompt" – one vivid sentence that, using the exact string in "video_prompt" as sole context, instructs an AI music generator to create a perfectly looping 4‑6 second soundtrack, specifying music genre, primary instruments, tempo in BPM, rhythmic feel, dominant key or mode, mood adjectives matching the setting, signature SFX layers synced to on‑screen action, spatial mix notes (reverb type, stereo width, depth of field), and mastering style (loudness target, tape‑saturated warmth or crystalline clarity).
+    "music_prompt" – one vivid sentence that creates a unique soundtrack matching the video's mood and action. Include:
+      - Innovative music genre or fusion (e.g., "orchestral dubstep" or "ambient metal")
+      - Unique instruments or sound design (e.g., "glass harmonica and digital glitches" or "prepared piano and field recordings")
+      - Specific tempo and rhythm pattern (e.g., "irregular 7/8 time signature" or "polyrhythmic 120 BPM")
+      - Creative mood and atmosphere (e.g., "dreamlike tension" or "cosmic wonder")
+      - Dynamic sound effects synced to gameplay (e.g., "reality-bending sound design" or "environmental audio storytelling")
+      - Spatial audio design (e.g., "binaural soundscape" or "3D audio positioning")
+      - Mastering style that enhances the experience (e.g., "analog warmth with digital precision" or "immersive surround mix")
     """
     
-    # Call the OpenAI API
+    # Call the OpenAI API with higher temperature for more creativity
     response = client.chat.completions.create(
-        model="gpt-4-turbo",  # Use an appropriate model
+        model="gpt-4-turbo",
         messages=[
-            {"role": "system", "content": "You are a creative assistant that generates JSON content."},
+            {"role": "system", "content": "You are a highly creative game designer and composer who specializes in innovative and unique concepts."},
             {"role": "user", "content": prompt}
         ],
         response_format={"type": "json_object"},
-        temperature=0.7,
+        temperature=0.9,  # Increased temperature for more creative variations
     )
     
     # Extract the JSON content from the response
