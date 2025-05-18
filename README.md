@@ -1,204 +1,250 @@
-# Game Idea Generator and Media Merger
+# AI Game Content Generator
 
-A complete workflow for generating game ideas, creating media assets, and merging them into a single video output.
+A complete workflow for creating and sharing AI-generated game concepts with viral social media content. This system generates unique game ideas, creates visual assets, produces music, and automatically composes viral social media posts.
 
 ## Features
 
-- Generate creative video and music prompts using OpenAI's API
-- Automatically create input and output folders
-- Generate music using the CassetteAI API (with both sync and async options)
-- Find and merge MP4 video files and WAV audio files
-- Ensure the output length is the minimum of the audio and video durations
-- Preserve video quality by using stream copying when possible
-- Fallback option when FFmpeg probe fails to get durations
+- **Two-Stage Video Generation**: 
+  - Creates high-quality images using FLUX-Pro Ultra API
+  - Animates those images into videos using Wan-2.1 Image-to-Video API
+- **Music Generation**: Produces unique game soundtracks using CassetteAI
+- **Viral Social Media Content**: Generates attention-grabbing tweets with strategic hashtags
+- **Wide Visual Style Variety**: Supports 100+ visual styles across 12 categories
+- **Experimental Aesthetics**: Creates unique, boundary-pushing visual concepts
+- **Automated Workflow**: Handles the entire content creation pipeline
 
-## Requirements
+## System Requirements
 
 - Python 3.6+
-- FFmpeg (must be installed and available in your PATH)
-- OpenAI API key (for prompt generation)
-- FAL.ai API key (for music generation)
-- Video generation tool (that accepts text prompts)
+- FFmpeg (installed and available in your PATH)
+- API Keys:
+  - OpenAI API key (for prompt generation and tweet creation)
+  - FAL.ai API key (for image, video, and music generation)
+- Twitter API credentials (optional, for automatic posting)
 
 ## Installation
 
-1. Make sure FFmpeg is installed on your system. If not, you can download it from [ffmpeg.org](https://ffmpeg.org/download.html) or install it using your system's package manager.
-
-2. After installing FFmpeg, ensure that the FFmpeg bin directory is added to your system PATH.
-
-3. Install the required Python packages:
-
+1. **Clone the repository**:
 ```bash
-pip install openai requests fal-client
+git clone https://github.com/yourusername/ai-game-content-generator.git
+cd ai-game-content-generator
 ```
 
-4. Set your API keys as environment variables:
-
+2. **Install required Python packages**:
 ```bash
-# On Windows
-set OPENAI_API_KEY=your_openai_api_key_here
-set FAL_KEY=your_fal_api_key_here
+# Using pip with requirements.txt (recommended)
+pip install -r requirements.txt
 
-# On macOS/Linux
-export OPENAI_API_KEY=your_openai_api_key_here
-export FAL_KEY=your_fal_api_key_here
+# Or manually install each package
+pip install openai requests fal-client python-dotenv tweepy asyncio
 ```
 
-## Complete Workflow
+3. **Install FFmpeg**:
+   - **Windows**: 
+     - Download from [ffmpeg.org](https://ffmpeg.org/download.html)
+     - Add the bin directory to your system PATH
+     - Verify installation with `ffmpeg -version`
+   - **macOS**: 
+     ```bash
+     brew install ffmpeg
+     ```
+   - **Linux**: 
+     ```bash
+     sudo apt install ffmpeg
+     ```
 
-The project consists of four main scripts:
+4. **Environment Setup**:
 
-1. `prompt_generate.py` - Generates creative prompts for video and audio
-2. `music_generation.py` - Generates music using the CassetteAI API
-3. `merge_audio_video.py` - Merges video and audio files
-4. `generate_and_merge.py` - Orchestrates the entire workflow
+   a. Create a `.env.local` file in the project root with your API keys:
+   ```
+   OPENAI_API_KEY=your_openai_api_key_here
+   FAL_KEY=your_fal_api_key_here
 
-### Step 1: Generate Prompts
+   # Optional Twitter API credentials (for posting)
+   TWITTER_BEARER_TOKEN=your_twitter_bearer_token
+   TWITTER_CONSUMER_KEY=your_twitter_consumer_key
+   TWITTER_CONSUMER_SECRET=your_twitter_consumer_secret
+   TWITTER_ACCESS_TOKEN=your_twitter_access_token
+   TWITTER_ACCESS_TOKEN_SECRET=your_twitter_access_token_secret
+   ```
 
-Run the complete workflow:
+   b. Obtain API keys from:
+   - OpenAI API: [https://platform.openai.com/](https://platform.openai.com/)
+   - FAL.ai API: [https://fal.ai/dashboard](https://fal.ai/dashboard)
+   - Twitter API (optional): [https://developer.twitter.com/](https://developer.twitter.com/)
+
+5. **Verify installation**:
+```bash
+# Test if the environment is correctly set up
+python -c "from services.utils import load_env_vars; load_env_vars(); print('Environment loaded successfully')"
+```
+
+## Project Structure
+
+```
+.
+├── create_game_content.py    # Main workflow orchestrator
+├── prompt_generate.py        # Generates creative prompts
+├── video_generation.py       # Handles two-stage video generation
+├── music_generation.py       # Generates music
+├── merge_audio_video.py      # Combines video and audio
+├── generate_and_merge.py     # Alternative workflow script
+├── services/                 # Utility services
+│   ├── tweet.py              # Twitter posting functionality
+│   ├── twitter_auth.py       # Twitter authentication
+│   └── utils.py              # Utility functions
+├── input/                    # Generated media inputs
+├── output/                   # Final media outputs
+├── prompts/                  # Generated text prompts
+└── requirements.txt          # Python dependencies
+```
+
+## Usage
+
+### Main Workflow - Complete Content Creation
+
+The easiest way to generate complete game content is to run:
 
 ```bash
-python generate_and_merge.py
+python create_game_content.py
 ```
 
 This will:
-1. Generate a video prompt and a music prompt using OpenAI API
-2. Save the prompts to the `prompts` directory
-3. Guide you through the next steps
+1. Generate creative game concept prompts
+2. Generate a high-quality game image using FLUX-Pro Ultra
+3. Animate that image into a video using Wan-2.1
+4. Generate matching game music
+5. Merge the video and audio
+6. Create a viral tweet for sharing
+7. Optionally post to Twitter
 
-### Step 2: Create Media Assets
+### Advanced Usage - Component by Component
 
-After generating prompts, you have two options:
-
-#### Option A: Automatic Music Generation
-
-Run the workflow with the `--generate-music` flag:
-
-```bash
-python generate_and_merge.py --generate-music
-```
-
-For better performance, you can use the async API version:
-
-```bash
-python generate_and_merge.py --generate-music --async
-```
-
-This will:
-1. Generate prompts (or use existing ones if using `--skip-prompt-generation`)
-2. Automatically generate music using the CassetteAI API
-3. You'll only need to manually generate the video
-
-#### Option B: Manual Creation
-
-1. Use the video prompt with your preferred video generation tool to create an MP4 file
-2. Use the music prompt with your preferred audio generation tool to create a WAV file
-3. Place both files in the `input` directory
-
-### Step 3: Merge Media Files
-
-The script will automatically:
-1. Find the first MP4 video file and first WAV audio file in the input folder
-2. Merge them and save the result as `merged_media.mp4` in the output folder
-
-### Using a Custom FFmpeg Path
-
-If FFmpeg is not in your system PATH, you can specify the path:
-
-```bash
-python generate_and_merge.py --ffmpeg-path C:\path\to\ffmpeg.exe
-```
-
-### Skipping Prompt Generation
-
-If you already have prompts and want to skip the generation step:
-
-```bash
-python generate_and_merge.py --skip-prompt-generation
-```
-
-### Setting Music Duration
-
-You can specify the duration of generated music in seconds:
-
-```bash
-python generate_and_merge.py --generate-music --music-duration 10
-```
-
-## Individual Script Usage
-
-### Prompt Generation
+#### 1. Generate Prompts Only
 
 ```bash
 python prompt_generate.py
 ```
 
+This generates creative game concept prompts and saves them to files.
+
+#### 2. Generate Image and Video Only
+
+```bash
+python video_generation.py --prompt "Your gameplay concept prompt"
+# or
+python video_generation.py --prompt-file prompts/video_prompt.txt
+```
+
+#### 3. Generate Music Only
+
+```bash
+python music_generation.py --prompt "Your music concept prompt"
+# or
+python music_generation.py --prompt-file prompts/music_prompt.txt
+```
+
+#### 4. Merge Audio and Video Only
+
+```bash
+python merge_audio_video.py --video-file input/game_video.mp4 --audio-file input/game_music.wav --output-file output/final_game_content.mp4
+```
+
+#### 5. Alternative Workflow
+
+```bash
+python generate_and_merge.py
+```
+
+This runs an alternative workflow with more command-line options.
+
+## Visual Style Categories
+
+The system supports 100+ visual styles across 12 categories:
+
+1. **Traditional Art Styles**: watercolor, oil painting, charcoal sketch, ukiyo-e, etc.
+2. **Modern Art Movements**: cubist, surrealist, impressionist, art deco, etc.
+3. **Digital & Contemporary**: vaporwave, glitch art, low poly, pixel art, etc.
+4. **Film & Photography**: film noir, technicolor, infrared photography, etc.
+5. **Animation Styles**: hand-drawn, stop motion, claymation, anime, etc.
+6. **Video Game Aesthetics**: 16-bit SNES, PS1, GameBoy 4-color, etc.
+7. **Experimental/Abstract**: neural network imagery, fractals, ASCII art, etc.
+8. **International Styles**: Russian constructivism, Chinese ink painting, etc.
+9. **Historical Periods**: Byzantine, Renaissance, 1980s, Y2K aesthetic, etc.
+10. **Mixed Media**: collage, photomontage, textile art, etc.
+11. **Textures & Materials**: chalk, blueprint, risograph, woodcut, etc.
+12. **Lighting Techniques**: chiaroscuro, noir lighting, volumetric lighting, etc.
+
+## Technical Details
+
+### Image Generation (FLUX-Pro Ultra)
+
+The system uses FAL.ai's FLUX-Pro Ultra API to generate high-quality images with these parameters:
+- Resolution: 1080p
+- Aspect ratio: 16:9
+- Safety features: Enabled
+- Format: JPEG
+
+### Video Generation (Wan-2.1)
+
+The system animates images into videos using FAL.ai's Wan-2.1 Image-to-Video API:
+- Frame rate: 16 FPS
+- Number of frames: 81 (5 seconds)
+- Resolution: 720p
+- Inference steps: 30
+- Guide scale: 5
+- Shift: 5
+
 ### Music Generation
 
-You can run the music generation script directly with various options:
+Uses CassetteAI through FAL.ai to generate 10-second audio clips that match the visual style.
+
+### Tweet Generation
+
+Creates viral, controversial tweets with:
+- Strong attention-grabbing hooks
+- Emotional engagement elements
+- Clear calls-to-action
+- 20+ strategic hashtags across multiple categories
+
+## Scheduled Content Creation (Optional)
+
+For automated content creation, use the scheduler:
 
 ```bash
-# Generate music with synchronous API (default)
-python music_generation.py
+# Windows
+start_scheduler.bat
 
-# Generate music with asynchronous API
-python music_generation.py --async
-
-# Use a specific prompt
-python music_generation.py --prompt "Your music prompt here"
-
-# Use a prompt from a file
-python music_generation.py --prompt-file path/to/prompt.txt
-
-# Specify duration and output folder
-python music_generation.py --duration 10 --output-folder custom_folder
+# Linux/Mac
+python daily_scheduler.py
 ```
 
-This will:
-1. Generate music using the specified prompt or a default test prompt
-2. Save the generated audio file to the specified output folder
+This runs the content creation process on a daily schedule.
 
-### Media Merging
+## Troubleshooting
 
-```bash
-python merge_audio_video.py
-```
+### Common Issues
 
-Optional arguments:
-- `-i, --input`: Input folder path (default: `./input`)
-- `-o, --output`: Output folder path (default: `./output`)
-- `--output-filename`: Output filename (default: `merged_media.mp4`)
-- `--ffmpeg-path`: Path to FFmpeg executable if not in PATH
+1. **API Key Errors**: Make sure your `.env.local` file contains valid API keys.
+2. **FFmpeg Missing**: Ensure FFmpeg is installed and in your system PATH.
+3. **Directory Errors**: The system will create required directories automatically.
+4. **Twitter Posting Errors**: Verify your Twitter API credentials if using auto-posting.
 
-## Supported File Types
+### Log Files
 
-- Video: MP4 files only
-- Audio: WAV files only
+The system creates log files in the project directory:
+- `error.log`: Contains error messages
+- `output.log`: Contains standard output
 
-## How the Merger Works
-
-1. Creates input and output folders if they don't exist
-2. Finds the first MP4 video file and first WAV audio file in the input folder
-3. Gets the duration of both input files using `ffprobe`
-4. Calculates the minimum duration between the audio and video
-5. Merges the video and audio, limiting the output to the minimum duration
-6. Saves the result to the output folder with the specified filename
-
-If `ffprobe` fails to get the media durations, the script will fall back to using FFmpeg's `-shortest` option, which automatically uses the shortest input stream to determine the output length.
-
-The video stream is copied without re-encoding for better performance, and the audio is encoded using the AAC codec for compatibility.
-
-## Async vs Sync API
-
-The music generation module supports both synchronous and asynchronous API calls:
-
-- **Synchronous API** (default): Uses `fal_client.subscribe()` which blocks until the music generation is complete
-- **Asynchronous API**: Uses `fal_client.submit_async()` and proper async/await patterns for better performance in async workflows
-
-The async version is particularly useful for longer music generation tasks or when integrating with other async code.
-
-## API Credits
+## Credits
 
 This project uses the following APIs:
-- [OpenAI API](https://openai.com/blog/openai-api) for prompt generation
-- [CassetteAI Music Generator on FAL.ai](https://fal.ai/models/cassetteai/music-generator/api) for music generation
+- [OpenAI API](https://openai.com/blog/openai-api) for prompt and tweet generation
+- [FLUX-Pro Ultra on FAL.ai](https://fal.ai/models/fal-ai/flux-pro/v1.1-ultra/api) for image generation
+- [Wan-2.1 on FAL.ai](https://fal.ai/models/fal-ai/wan-i2v/api) for image-to-video conversion
+- [CassetteAI on FAL.ai](https://fal.ai/models/cassetteai/music-generator/api) for music generation
+- [Twitter API](https://developer.twitter.com/en/docs/twitter-api) for social media posting
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
