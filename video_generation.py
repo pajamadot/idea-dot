@@ -10,21 +10,21 @@ from services.utils import load_env_vars
 # Load environment variables
 load_env_vars()
 
-async def generate_video_async(
+async def generate_image_async(
     prompt: str,
-    duration: str = "5",
-    negative_prompt: str = "worst quality, inconsistent motion, blurry, jittery, distorted",
-    cfg_scale: float = 0.5,
     output_folder: str = "input",
-    output_filename: str = "game_video.mp4"
+    output_filename: str = "game_image.jpg",
+    num_images: int = 1,
+    enable_safety_checker: bool = True,
+    safety_tolerance: str = "2",
+    output_format: str = "jpeg",
+    aspect_ratio: str = "16:9"
 ) -> Optional[str]:
     """
-    Generate video using Kling 2.0 Master Text to Video API and download it to the specified folder.
-    Asynchronous version using run_async.
+    Generate image using FLUX-Pro Ultra API and download it to the specified folder.
     """
-    print(f"Generating video asynchronously with prompt: {prompt}")
-    print(f"Requested duration: {duration} seconds")
-    print(f"Aspect ratio: 16:9")
+    print(f"Generating image with prompt: {prompt}")
+    print(f"Aspect ratio: {aspect_ratio}")
     os.makedirs(output_folder, exist_ok=True)
     fal_key = os.getenv("FAL_KEY")
     if not fal_key:
@@ -32,27 +32,87 @@ async def generate_video_async(
         return None
 
     try:
-        # Calculate number of frames based on duration and frame rate
-        frame_rate = 30
-        number_of_frames = int(float(duration) * frame_rate)
-        
         result = await fal_client.run_async(
-            "fal-ai/ltx-video-13b-dev",
+            "fal-ai/flux-pro/v1.1-ultra",
+            arguments={
+                "prompt": prompt,
+                "num_images": num_images,
+                "enable_safety_checker": enable_safety_checker,
+                "safety_tolerance": safety_tolerance,
+                "output_format": output_format,
+                "aspect_ratio": aspect_ratio
+            }
+        )
+        
+        if not result or "images" not in result or len(result["images"]) == 0:
+            print("Error: Failed to generate image or invalid response")
+            return None
+
+        image_url = result["images"][0]["url"]
+        print(f"Image generated successfully. URL: {image_url}")
+        
+        response = requests.get(image_url)
+        if response.status_code != 200:
+            print(f"Error downloading image file: HTTP {response.status_code}")
+            return None
+
+        output_path = os.path.join(output_folder, output_filename)
+        with open(output_path, "wb") as f:
+            f.write(response.content)
+        print(f"Image saved to: {output_path}")
+        return {
+            "file_path": output_path,
+            "url": image_url
+        }
+    except Exception as e:
+        print(f"Error generating image: {e}")
+        return None
+
+async def generate_video_async(
+    image_url: str,
+    prompt: str = "",
+    output_folder: str = "input",
+    output_filename: str = "game_video.mp4",
+    negative_prompt: str = "worst quality, inconsistent motion, blurry, jittery, distorted, low resolution, bad composition, poor lighting, unrealistic physics, artificial movement",
+    num_frames: int = 81,
+    frames_per_second: int = 16,
+    resolution: str = "720p",
+    num_inference_steps: int = 30,
+    guide_scale: int = 5,
+    shift: int = 5,
+    enable_safety_checker: bool = True,
+    enable_prompt_expansion: bool = False,
+    acceleration: str = "regular",
+    aspect_ratio: str = "auto"
+) -> Optional[str]:
+    """
+    Generate video from an image using Wan-2.1 Image-to-Video API and download it to the specified folder.
+    """
+    print(f"Generating video from image: {image_url}")
+    print(f"Video prompt: {prompt}")
+    os.makedirs(output_folder, exist_ok=True)
+    fal_key = os.getenv("FAL_KEY")
+    if not fal_key:
+        print("Error: FAL_KEY environment variable not set")
+        return None
+
+    try:
+        result = await fal_client.run_async(
+            "fal-ai/wan-i2v",
             arguments={
                 "prompt": prompt,
                 "negative_prompt": negative_prompt,
-                "loras": [],
-                "resolution": "720p",
-                "aspect_ratio": "16:9",
-                "number_of_frames": number_of_frames,
-                "first_pass_number_of_steps": 30,
-                "first_pass_skip_final_steps": 3,
-                "second_pass_number_of_steps": 30,
-                "second_pass_skip_initial_steps": 17,
-                "frame_rate": frame_rate,
-                "expand_prompt": False,
-                "reverse_video": False,
-                "enable_safety_checker": True
+                "image_url": image_url,
+                "num_frames": num_frames,
+                "frames_per_second": frames_per_second,
+                "resolution": resolution,
+                "num_inference_steps": num_inference_steps,
+                "guide_scale": guide_scale,
+                "shift": shift,
+                "enable_safety_checker": enable_safety_checker,
+                "enable_prompt_expansion": enable_prompt_expansion,
+                "acceleration": acceleration,
+                "aspect_ratio": aspect_ratio
             }
         )
         
@@ -74,13 +134,49 @@ async def generate_video_async(
         print(f"Video saved to: {output_path}")
         return output_path
     except Exception as e:
-        print(f"Error generating video asynchronously: {e}")
+        print(f"Error generating video: {e}")
         return None
+
+async def generate_game_video_async(
+    prompt: str,
+    output_folder: str = "input",
+    image_filename: str = "game_image.jpg",
+    video_filename: str = "game_video.mp4"
+) -> Optional[str]:
+    """
+    Two-stage process: 
+    1. Generate an image from a prompt
+    2. Generate a video from that image
+    """
+    print(f"\n=== Stage 1: Generating Image from Prompt ===")
+    image_result = await generate_image_async(
+        prompt=prompt,
+        output_folder=output_folder,
+        output_filename=image_filename
+    )
+    
+    if not image_result:
+        print("Image generation failed. Cannot proceed to video generation.")
+        return None
+    
+    print(f"\n=== Stage 2: Generating Video from Image ===")
+    video_path = await generate_video_async(
+        image_url=image_result["url"],
+        prompt=prompt,
+        output_folder=output_folder,
+        output_filename=video_filename
+    )
+    
+    if not video_path:
+        print("Video generation failed.")
+        return None
+    
+    return video_path
 
 def generate_video_from_prompt_file(
     prompt_file: str,
-    duration: str = "5",
-    negative_prompt: str = "blur, distort, and low quality",
+    duration: str = "10",
+    negative_prompt: str = "worst quality, inconsistent motion, blurry, jittery, distorted, low resolution, bad composition, poor lighting, unrealistic physics, artificial movement",
     cfg_scale: float = 0.5,
     output_folder: str = "input",
     output_filename: str = "game_video.mp4"
@@ -95,13 +191,10 @@ def generate_video_from_prompt_file(
             print(f"Error: Empty prompt in file {prompt_file}")
             return None
         # Run the async function in an event loop
-        return asyncio.run(generate_video_async(
-            prompt,
-            duration,
-            negative_prompt,
-            cfg_scale,
-            output_folder,
-            output_filename
+        return asyncio.run(generate_game_video_async(
+            prompt=prompt,
+            output_folder=output_folder,
+            video_filename=output_filename
         ))
     except FileNotFoundError:
         print(f"Error: Prompt file not found: {prompt_file}")
@@ -112,17 +205,25 @@ def generate_video_from_prompt_file(
 
 async def async_main():
     os.makedirs("input", exist_ok=True)
-    test_prompt = "A cinematic shot of a futuristic cityscape at sunset, with flying cars and neon lights reflecting off glass buildings. The camera slowly pans upward to reveal a massive space station in orbit."
-    print("\n=== Testing Async API with Direct Prompt ===")
-    output_file = await generate_video_async(test_prompt)
+    test_prompt = """
+    A cinematic sequence in a breathtaking cyberpunk metropolis at twilight. The camera begins with a slow, dramatic tilt up from street level, revealing towering skyscrapers with holographic advertisements that cast vibrant neon reflections on rain-slicked streets. Flying vehicles weave between buildings, their anti-gravity engines leaving trails of blue light. 
+
+    The scene transitions to a close-up of a massive digital billboard displaying a mysterious countdown, its red numbers reflected in the eyes of passersby. The camera then smoothly tracks a sleek, autonomous delivery drone as it navigates through a maze of floating platforms and suspended walkways. 
+
+    As the sequence continues, we see a group of augmented humans with glowing cybernetic implants, their movements fluid and synchronized as they interact with floating holographic interfaces. The camera pulls back to reveal the entire cityscape, now illuminated by a spectacular aurora borealis that dances across the sky, its colors shifting between electric blue and deep purple. 
+
+    The final shot shows a massive space elevator in the distance, its base surrounded by swirling clouds of steam and energy, while the top disappears into the aurora-lit clouds. The entire sequence is rendered in photorealistic detail with dynamic lighting, atmospheric effects, and smooth camera movements. 4K resolution, cinematic color grading, and professional cinematography.
+    """
+    print("\n=== Testing Two-Stage Video Generation ===")
+    output_file = await generate_game_video_async(test_prompt)
     
     prompt_file = "prompts/video_prompt.txt"
     if os.path.exists(prompt_file):
-        print("\n=== Testing Async API with Prompt File ===")
+        print("\n=== Testing Two-Stage Video Generation with Prompt File ===")
         with open(prompt_file, 'r') as f:
             file_prompt = f.read().strip()
         if file_prompt:
-            output_file = await generate_video_async(file_prompt)
+            output_file = await generate_game_video_async(file_prompt)
         else:
             print(f"Error: Empty prompt in file {prompt_file}")
     else:
@@ -130,22 +231,19 @@ async def async_main():
         print("You can create this file by running generate_and_merge.py first")
     
     if output_file:
-        print("\nSuccess! Async video generation complete.")
+        print("\nSuccess! Two-stage video generation complete.")
         print(f"Generated file: {output_file}")
         print("You can now use merge_audio_video.py to combine this with audio")
     else:
-        print("\nAsync video generation failed. Please check the errors above.")
+        print("\nTwo-stage video generation failed. Please check the errors above.")
 
 if __name__ == "__main__":
     import argparse
-    parser = argparse.ArgumentParser(description="Generate video using Kling 2.0 Master Text to Video API")
-    parser.add_argument("--prompt", type=str, help="Video prompt to use (overrides default test prompt)")
-    parser.add_argument("--prompt-file", type=str, help="Path to file containing the video prompt")
-    parser.add_argument("--duration", type=str, default="5", choices=["5", "10"], help="Duration of video in seconds (default: 5)")
-    parser.add_argument("--negative-prompt", type=str, default="blur, distort, and low quality", help="Negative prompt to avoid certain elements")
-    parser.add_argument("--cfg-scale", type=float, default=0.5, help="CFG scale for prompt adherence (default: 0.5)")
-    parser.add_argument("--output-folder", type=str, default="input", help="Folder to save generated video (default: input)")
-    parser.add_argument("--output-filename", type=str, default="game_video.mp4", help="Output filename (default: game_video.mp4)")
+    parser = argparse.ArgumentParser(description="Generate video using two-stage Image-to-Video generation")
+    parser.add_argument("--prompt", type=str, help="Prompt to use for image and video generation")
+    parser.add_argument("--prompt-file", type=str, help="Path to file containing the prompt")
+    parser.add_argument("--output-folder", type=str, default="input", help="Folder to save generated files (default: input)")
+    parser.add_argument("--output-filename", type=str, default="game_video.mp4", help="Output video filename (default: game_video.mp4)")
     
     args = parser.parse_args()
     os.makedirs(args.output_folder, exist_ok=True)
@@ -154,21 +252,15 @@ if __name__ == "__main__":
         print(f"\n=== Using Prompt from File: {args.prompt_file} ===")
         output_file = generate_video_from_prompt_file(
             args.prompt_file,
-            args.duration,
-            args.negative_prompt,
-            args.cfg_scale,
-            args.output_folder,
-            args.output_filename
+            output_folder=args.output_folder,
+            output_filename=args.output_filename
         )
     elif args.prompt:
         print(f"\n=== Using Provided Prompt ===")
-        output_file = asyncio.run(generate_video_async(
-            args.prompt,
-            args.duration,
-            args.negative_prompt,
-            args.cfg_scale,
-            args.output_folder,
-            args.output_filename
+        output_file = asyncio.run(generate_game_video_async(
+            prompt=args.prompt,
+            output_folder=args.output_folder,
+            video_filename=args.output_filename
         ))
     else:
         asyncio.run(async_main())

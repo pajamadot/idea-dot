@@ -4,7 +4,7 @@ import json
 from openai import OpenAI
 from services.utils import load_env_vars
 from music_generation import generate_music_async
-from video_generation import generate_video_async
+from video_generation import generate_game_video_async
 from merge_audio_video import merge_audio_video
 from services.tweet import tweet
 
@@ -13,6 +13,7 @@ load_env_vars()
 
 # Constants for consistent filenames
 MUSIC_FILENAME = "game_music.wav"
+IMAGE_FILENAME = "game_image.jpg"
 VIDEO_FILENAME = "game_video.mp4"
 FINAL_FILENAME = "final_game_content.mp4"
 
@@ -23,51 +24,55 @@ async def generate_twitter_content(video_prompt: str, music_prompt: str) -> str:
     client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
     
     prompt = f"""
-    Create a viral-worthy tweet about this innovative game concept:
+    Create a viral-worthy, slightly controversial tweet about this game concept:
     Video: {video_prompt}
     Music: {music_prompt}
     
     Requirements:
-    1. Keep it under 280 characters
-    2. Start with a strong visual hook that captures attention
-    3. Create emotional engagement through tension, action, or curiosity
-    4. Include a clear call-to-action (e.g., "Would you play this?", "Drop a ❤️ if you want to try this")
-    5. Add 2-5 relevant emojis to enhance readability and engagement
-    6. Include 4-6 hashtags:
-       - Always include #AIGeneratedGameplay
-       - 1-2 broad gaming tags (e.g., #gamedev, #indiegame)
-       - 1-2 niche/mood tags based on the game's style (e.g., #pixelart, #scifi, #synthwave)
-    7. Format:
+    1. Keep it under 280 characters for the main tweet body
+    2. Start with a strong, attention-grabbing hook that might be slightly controversial
+    3. Create emotional engagement through:
+       - Provocative questions
+       - Bold statements
+       - Industry challenges
+       - Future predictions
+    4. Include a clear call-to-action that encourages debate (e.g., "Would you play this?", "Drop a ❤️ if you want to try this", "RT if you think this is the future of gaming")
+    5. Add 3-5 relevant emojis to enhance readability and engagement
+    6. Include AT LEAST 20 strategic hashtags in this format:
        <Tweet body>
        <Line break>
-       #hashtags
+       #hashtag1 #hashtag2 #hashtag3 ...
+       
+    Include the following categories of hashtags:
+       - REQUIRED: #AIGeneratedGameplay
+       - GAMING INDUSTRY (5-6): #gamedev #indiegame #gamedevelopment #gamingcommunity #esports #VGdevelopment
+       - GAMING PLATFORMS (3-4): #PCgaming #mobilegaming #consolegaming #PlayStation #Xbox #NintendoSwitch
+       - GAMING GENRES (3-4): #RPG #FPS #strategy #openworld #simulation #adventure #sportsGame
+       - TECH & AI (3-4): #AI #ArtificialIntelligence #MachineLearning #AIArt #AIgames #tech #futuretech
+       - VIRAL & TRENDING (3-4): #viral #trending #insane #mindblowing #nextlevel #epicgaming
+       - EMOTIONS & REACTIONS (2-3): #stunning #mindblowing #gorgeous #awesome #epicwin
+       - CALL TO ACTION (1-2): #MustPlay #MustSee #CheckThisOut #RT
 
-    Game Concept Guidelines:
-    - Think beyond traditional genres (e.g., not just platformers, RPGs, or shooters)
-    - Consider experimental mechanics like:
-      * Games that blend physical and digital worlds
-      * Social experiments disguised as games
-      * Games that evolve based on player emotions
-      * Games that use real-world data or events
-      * Games that challenge traditional gameplay conventions
-    - Explore unique themes like:
-      * Philosophical concepts
-      * Abstract emotions
-      * Social commentary
-      * Environmental awareness
-      * Cultural experiences
-    - Consider innovative gameplay elements:
-      * Games that require multiple devices
-      * Games that use AI to adapt to players
-      * Games that incorporate real-time world events
-      * Games that blend different art forms
-      * Games that challenge player perceptions
+    Format:
+       <Controversial hook>
+       <Emotional engagement>
+       <Call to action>
+       <Line break>
+       #hashtag1 #hashtag2 #hashtag3 ... (at least 20 hashtags)
+
+    Controversial Elements (use 1-2):
+    - Challenge industry norms
+    - Question traditional game design
+    - Suggest revolutionary changes
+    - Compare to existing games
+    - Make bold predictions
+    - Address current gaming controversies
     """
     
     response = client.chat.completions.create(
         model="gpt-4-turbo",
         messages=[
-            {"role": "system", "content": "You are a viral game content strategist and copywriter for an AI-driven game studio. Your expertise lies in creating innovative, boundary-pushing game concepts that challenge traditional gaming norms. You excel at presenting experimental and avant-garde game ideas in an engaging way that makes viewers stop scrolling. You're known for your ability to make unconventional game concepts feel accessible and exciting."},
+            {"role": "system", "content": "You are a viral game content strategist and copywriter for an AI-driven game studio. Your tweets are known for their high engagement rates and ability to go viral through slightly controversial but thought-provoking content. You excel at creating emotionally resonant content that makes viewers stop scrolling and engage in discussion. You're not afraid to challenge industry norms while maintaining professionalism. You're an expert at hashtag strategy and know exactly which gaming hashtags are trending and will maximize engagement."},
             {"role": "user", "content": prompt}
         ],
         temperature=0.9,  # Increased temperature for more creative variations
@@ -91,6 +96,7 @@ async def create_game_content():
     
     # Define file paths
     music_path = os.path.join(input_dir, MUSIC_FILENAME)
+    image_path = os.path.join(input_dir, IMAGE_FILENAME)
     video_path = os.path.join(input_dir, VIDEO_FILENAME)
     final_path = os.path.join(output_dir, FINAL_FILENAME)
     
@@ -127,13 +133,13 @@ async def create_game_content():
         print("Music generation failed. Exiting.")
         return
     
-    # Generate video
-    print("\nGenerating video...")
-    video_file = await generate_video_async(
+    # Generate video using two-stage process (image -> video)
+    print("\nGenerating video (two-stage process)...")
+    video_file = await generate_game_video_async(
         prompt=video_prompt,
-        duration="5",  # Video duration
         output_folder=input_dir,
-        output_filename=VIDEO_FILENAME  # Use consistent filename
+        image_filename=IMAGE_FILENAME,
+        video_filename=VIDEO_FILENAME
     )
     
     if not video_file:

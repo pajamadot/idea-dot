@@ -22,14 +22,26 @@ def generate_prompts() -> Tuple[str, str]:
     prompt = """
     Create and return one valid JSON object with exactly two string fields:
 
-    "video_prompt" – a single, compact sentence that will generate a 4‑6 second perfectly looping gameplay video clip. The prompt should be highly creative and unique, containing (in order, comma‑separated):
+    "video_prompt" – a highly detailed, creative description that will generate a unique gameplay video clip. The prompt should be highly experimental and visually distinctive, containing (in no particular order, but all elements must be included):
       1️⃣ game genre + innovative core mechanic (e.g., "gravity-shifting platformer" or "time-bending stealth"),
       2️⃣ unique environment/setting with specific mood and atmosphere (e.g., "bioluminescent underwater ruins" or "floating islands in a storm"),
       3️⃣ distinctive main character with unique abilities (e.g., "shapeshifting shadow mage" or "mechanical dragon rider"),
       4️⃣ creative enemies/obstacles with unique behaviors (e.g., "mirror-image doppelgangers" or "living architecture"),
       5️⃣ dynamic gameplay moment with special effects (e.g., "character splits into three time-clones" or "environment morphs between seasons"),
       6️⃣ cinematic camera move that enhances the action (e.g., "dramatic slow-mo zoom" or "dynamic orbit shot"),
-      7️⃣ distinctive art style with unique visual elements (e.g., "hand-painted watercolor" or "neon-noir cyberpunk"),
+      7️⃣ VISUAL STYLE - randomly select ONE visual style from this extensive list:
+         - Traditional Art Styles: "watercolor painting", "oil painting", "charcoal sketch", "ink wash", "ukiyo-e woodblock print", "fresco", "medieval manuscript illumination", "stained glass"
+         - Modern Art Movements: "cubist", "surrealist", "impressionist", "expressionist", "art nouveau", "art deco", "pop art", "bauhaus", "brutalist", "minimalist", "abstract expressionism"
+         - Digital & Contemporary: "vaporwave", "glitch art", "low poly", "pixel art", "voxel", "isometric", "vector art", "flat design", "3D render", "photogrammetry", "procedural generation"
+         - Film & Photography: "film noir", "technicolor", "sepia tone", "analog photography", "infrared photography", "tilt-shift", "long exposure", "time-lapse", "daguerreotype", "polaroid"
+         - Animation Styles: "hand-drawn animation", "stop motion", "claymation", "rotoscope", "anime", "cartoon", "cel shading", "South Park paper cut-out", "silhouette animation"
+         - Video Game Aesthetics: "16-bit SNES", "32-bit PS1", "Nintendo 64 low-poly", "Dreamcast", "GameBoy 4-color", "PS2 era", "modern AAA", "Unity engine", "Unreal Engine"
+         - Experimental/Abstract: "databending", "neural network dream imagery", "fractal", "generative art", "wireframe", "holographic", "light painting", "ASCII art", "circuit board aesthetic"
+         - International Styles: "Russian constructivism", "Mexican muralism", "Chinese ink painting", "Aboriginal dot painting", "Indian miniature painting", "Persian miniature", "African mask-inspired"
+         - Historical Periods: "ancient Egyptian", "Byzantine mosaic", "Gothic", "Renaissance", "Baroque", "Rococo", "Victorian", "1920s", "1950s", "1980s", "1990s web design", "Y2K aesthetic"
+         - Mixed Media: "collage", "decoupage", "photomontage", "assemblage", "found object art", "paper cutting", "textile art", "mosaic"
+         - Textures & Materials: "chalk", "crayon", "pencil sketch", "blueprint", "newspaper print", "risograph", "screen printing", "woodcut", "linocut", "etching", "lithography"
+         - Lighting Techniques: "chiaroscuro", "noir lighting", "golden hour", "blue hour", "bioluminescence", "neon", "strobe effect", "volumetric lighting", "ray tracing", "global illumination"
       8️⃣ creative lighting & color palette that sets the mood (e.g., "aurora borealis lighting" or "monochrome with selective color"),
       9️⃣ minimal but stylish HUD elements (e.g., "floating holographic displays" or "environment-integrated UI"),
       🔟 video specs & artistic direction (e.g., "4K 60fps, 16:9, seamless loop, highly detailed, trending on ArtStation, cinematic depth of field").
@@ -42,17 +54,19 @@ def generate_prompts() -> Tuple[str, str]:
       - Dynamic sound effects synced to gameplay (e.g., "reality-bending sound design" or "environmental audio storytelling")
       - Spatial audio design (e.g., "binaural soundscape" or "3D audio positioning")
       - Mastering style that enhances the experience (e.g., "analog warmth with digital precision" or "immersive surround mix")
+    
+    IMPORTANT: For the video_prompt, do not follow a predictable format. Arrange the required elements in a creative, natural-sounding description where the elements flow together coherently but in a random order. The final prompt should read as a cohesive, imaginative description rather than a mechanical list of elements.
     """
     
     # Call the OpenAI API with higher temperature for more creativity
     response = client.chat.completions.create(
         model="gpt-4-turbo",
         messages=[
-            {"role": "system", "content": "You are a highly creative game designer and composer who specializes in innovative and unique concepts."},
+            {"role": "system", "content": "You are a highly experimental game designer and visual artist who specializes in creating the most unique, visually striking, and unconventional gaming concepts. You love to break visual boundaries and create art styles that have never been seen before. You're known for your wildly creative style combinations and unexpected aesthetic choices."},
             {"role": "user", "content": prompt}
         ],
         response_format={"type": "json_object"},
-        temperature=0.9,  # Increased temperature for more creative variations
+        temperature=1.0,  # Maximum temperature for extreme creativity and randomness
     )
     
     # Extract the JSON content from the response
