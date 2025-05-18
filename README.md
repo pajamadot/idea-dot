@@ -1,4 +1,4 @@
-# AI Game Content Generator
+# AI Game Idea Generator
 
 A complete workflow for creating and sharing AI-generated game concepts with viral social media content. This system generates unique game ideas, creates visual assets, produces music, and automatically composes viral social media posts.
 
@@ -89,6 +89,8 @@ python -c "from services.utils import load_env_vars; load_env_vars(); print('Env
 ├── music_generation.py       # Generates music
 ├── merge_audio_video.py      # Combines video and audio
 ├── generate_and_merge.py     # Alternative workflow script
+├── daily_scheduler.py        # Runs content creation on a schedule
+├── start_scheduler.bat       # Windows batch file to start scheduler
 ├── services/                 # Utility services
 │   ├── tweet.py              # Twitter posting functionality
 │   ├── twitter_auth.py       # Twitter authentication
