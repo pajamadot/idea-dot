@@ -13,7 +13,7 @@ load_env_vars()
 async def generate_video_async(
     prompt: str,
     duration: str = "5",
-    negative_prompt: str = "blur, distort, and low quality",
+    negative_prompt: str = "worst quality, inconsistent motion, blurry, jittery, distorted",
     cfg_scale: float = 0.5,
     output_folder: str = "input",
     output_filename: str = "game_video.mp4"
@@ -32,14 +32,27 @@ async def generate_video_async(
         return None
 
     try:
+        # Calculate number of frames based on duration and frame rate
+        frame_rate = 30
+        number_of_frames = int(float(duration) * frame_rate)
+        
         result = await fal_client.run_async(
-            "fal-ai/kling-video/v2/master/text-to-video",
+            "fal-ai/ltx-video-13b-dev",
             arguments={
                 "prompt": prompt,
-                "duration": duration,
-                "aspect_ratio": "16:9",
                 "negative_prompt": negative_prompt,
-                "cfg_scale": cfg_scale
+                "loras": [],
+                "resolution": "720p",
+                "aspect_ratio": "16:9",
+                "number_of_frames": number_of_frames,
+                "first_pass_number_of_steps": 30,
+                "first_pass_skip_final_steps": 3,
+                "second_pass_number_of_steps": 30,
+                "second_pass_skip_initial_steps": 17,
+                "frame_rate": frame_rate,
+                "expand_prompt": False,
+                "reverse_video": False,
+                "enable_safety_checker": True
             }
         )
         
