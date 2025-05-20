@@ -1,8 +1,9 @@
-# Example Twitter video URLs
-# Replace these with actual Twitter video URLs
-https://twitter.com/username/status/123456789
-https://twitter.com/username/status/987654321
-
-# This is a comment line and will be ignored
-https://twitter.com/another_user/status/456789123
-https://twitter.com/third_user/status/567891234 
+https://x.com/veronicaisbrave/status/1924920404306530772
+https://x.com/veronicaisbrave/status/1924918435969900735
+https://x.com/veronicaisbrave/status/1924917250877776111
+https://x.com/veronicaisbrave/status/1924915464607506886
+https://x.com/veronicaisbrave/status/1924913467691012103
+https://x.com/veronicaisbrave/status/1924911462692143506
+https://x.com/veronicaisbrave/status/1924909856651174025
+https://x.com/veronicaisbrave/status/1924907315221667873
+https://x.com/veronicaisbrave/status/1924897382862295458

@@ -22,12 +22,21 @@ def download_twitter_video(url: str, output_dir: str) -> Optional[str]:
     # Generate a temporary filename in the output directory
     filename = os.path.join(output_dir, f"twitter_video_{hash(url) % 10000:04d}.mp4")
     
+    # Find the yt-dlp executable
+    yt_dlp_path = "yt-dlp"
+    
+    # Try to find yt-dlp in user's scripts directory
+    user_scripts_path = os.path.join(os.path.expanduser("~"), "AppData", "Roaming", "Python", "Python312", "Scripts", "yt-dlp.exe")
+    if os.path.exists(user_scripts_path):
+        yt_dlp_path = user_scripts_path
+        print(f"Using yt-dlp from: {yt_dlp_path}")
+    
     try:
         # Use yt-dlp to download the video
         print(f"Downloading video from {url}...")
         result = subprocess.run(
             [
-                "yt-dlp", 
+                yt_dlp_path, 
                 "--no-playlist",
                 "--no-warnings",
                 "-f", "best[ext=mp4]",
@@ -47,6 +56,10 @@ def download_twitter_video(url: str, output_dir: str) -> Optional[str]:
             print(f"Failed to download video from {url}: File not created or empty")
             return None
             
+    except FileNotFoundError:
+        print(f"Error: yt-dlp not found. Please install it with: pip install -U yt-dlp")
+        print(f"Then add it to your PATH or specify its location in the script.")
+        return None
     except subprocess.CalledProcessError as e:
         print(f"Failed to download video from {url}: {e}")
         print(f"Error output: {e.stderr}")
