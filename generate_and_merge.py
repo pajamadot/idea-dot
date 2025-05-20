@@ -5,6 +5,7 @@ import time
 import asyncio
 from prompt_generate import generate_prompts, save_prompts_to_files
 from services.utils import load_env_vars
+import json
 
 # Load environment variables
 load_env_vars()
@@ -17,6 +18,18 @@ async def async_generate_music(music_prompt_file, duration, input_dir):
         # Read prompt from file
         with open(music_prompt_file, 'r') as f:
             music_prompt = f.read().strip()
+        
+        # Check if the prompt might be JSON and handle it properly
+        if music_prompt.startswith('{') and music_prompt.endswith('}'):
+            try:
+                # Try to parse as JSON
+                json_obj = json.loads(music_prompt)
+                if isinstance(json_obj, dict):
+                    print(f"Warning: Music prompt is a JSON object in the file. Using as-is.")
+                    # The music_generation module will handle the conversion
+            except json.JSONDecodeError:
+                # Not valid JSON, use as plain text
+                pass
         
         print(f"\nGenerating music asynchronously...")
         music_file = await generate_music_async(music_prompt, duration=duration, output_folder=input_dir)

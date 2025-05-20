@@ -23,6 +23,14 @@ async def generate_music_async(
     if duration < 10:
         print("Duration must be at least 10 seconds. Setting duration to 10.")
         duration = 10
+    
+    # Ensure prompt is a string
+    if isinstance(prompt, dict):
+        print(f"Warning: prompt is a dictionary: {prompt}")
+        import json
+        prompt = json.dumps(prompt, indent=2)
+        print(f"Converted to string: {prompt}")
+    
     print(f"Generating music asynchronously with prompt: {prompt}")
     print(f"Requested duration: {duration} seconds")
     os.makedirs(output_folder, exist_ok=True)
@@ -72,6 +80,18 @@ def generate_music_from_prompt_file(
         if not prompt:
             print(f"Error: Empty prompt in file {prompt_file}")
             return None
+        
+        # Check if prompt looks like JSON and handle it
+        if prompt.startswith('{') and prompt.endswith('}'):
+            try:
+                import json
+                json_obj = json.loads(prompt)
+                if isinstance(json_obj, dict):
+                    print(f"Warning: Prompt appears to be a JSON object. Using as-is.")
+            except json.JSONDecodeError:
+                # Not valid JSON, use as plain text
+                pass
+                
         # Run the async function in an event loop
         return asyncio.run(generate_music_async(
             prompt, 
