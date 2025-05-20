@@ -176,3 +176,4 @@ cython_debug/
 /input
 /prompts
 /output
+.env.local.genni
