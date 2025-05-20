@@ -250,3 +250,80 @@ This project uses the following APIs:
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
+
+# Twitter Video Downloader and Concatenator
+
+A tool for downloading videos from Twitter and concatenating them into a single video file using ffmpeg.
+
+## Requirements
+
+- Python 3.6+
+- FFmpeg installed and available in your PATH
+- yt-dlp (installed via pip)
+
+## Installation
+
+1. Clone or download this repository
+2. Install the required Python packages:
+
+```bash
+pip install -r requirements.txt
+```
+
+3. Make sure FFmpeg is installed on your system:
+   - **Windows**: Download from [ffmpeg.org](https://ffmpeg.org/download.html) and add to your PATH
+   - **MacOS**: Install via Homebrew: `brew install ffmpeg`
+   - **Linux**: Install via package manager, e.g., `apt install ffmpeg`
+
+## Usage
+
+### Basic Usage
+
+1. Download a single Twitter video:
+
+```bash
+python twitter_video_downloader.py --url https://twitter.com/username/status/123456789
+```
+
+2. Download multiple Twitter videos and concatenate them:
+
+```bash
+python twitter_video_downloader.py --urls https://twitter.com/username/status/123456789 https://twitter.com/username/status/987654321
+```
+
+3. Download videos from a list in a file:
+
+```bash
+python twitter_video_downloader.py --url-file twitter_urls.txt
+```
+
+### Options
+
+- `--output-dir`: Specify the directory to save downloaded videos (default: "twitter_videos")
+- `--output-file`: Specify the filename for the concatenated video (default: "concatenated_video.mp4")
+- `--no-concat`: Download videos only, without concatenating them
+
+### Example URL File
+
+Create a text file (e.g., `twitter_urls.txt`) with one URL per line:
+
+```
+https://twitter.com/username/status/123456789
+https://twitter.com/username/status/987654321
+# This is a comment and will be ignored
+https://twitter.com/another_user/status/123456789
+```
+
+## Notes
+
+- The script will skip any URLs that fail to download
+- Videos will be downloaded in the best available MP4 format
+- Concatenation is done using FFmpeg's concat demuxer, which preserves video quality
+- Videos must have compatible codecs to be concatenated properly
+
+## Troubleshooting
+
+- If you get permission errors, make sure you have write access to the output directory
+- If concatenation fails, it may be due to incompatible video formats
+- Twitter may rate-limit requests, so downloading many videos may take time
+- Make sure you have a stable internet connection

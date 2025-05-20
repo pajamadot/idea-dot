@@ -1,0 +1,8 @@
+# Example Twitter video URLs
+# Replace these with actual Twitter video URLs
+https://twitter.com/username/status/123456789
+https://twitter.com/username/status/987654321
+
+# This is a comment line and will be ignored
+https://twitter.com/another_user/status/456789123
+https://twitter.com/third_user/status/567891234 
