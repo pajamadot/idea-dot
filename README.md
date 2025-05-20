@@ -2,6 +2,10 @@
 
 A complete workflow for creating and sharing AI-generated game concepts with viral social media content. This system generates unique game ideas, creates visual assets, produces music, and automatically composes viral social media posts.
 
+## Follow Our Generated Content
+- [@talemonk_genni](https://x.com/talemonk_genni) - Auto-generated posts
+- [@veronicaisbrave](https://x.com/veronicaisbrave) - Branch for dancing video posts
+
 ## Features
 
 - **Two-Stage Video Generation**: 
