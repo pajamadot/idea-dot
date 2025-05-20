@@ -37,6 +37,50 @@ async def async_generate_music(music_prompt_file, duration, input_dir):
         print(f"Unexpected error in async music generation: {e}")
         return None
 
+def get_visual_style_categories():
+    """Return the list of visual style categories"""
+    return [
+        "Traditional Art Styles",
+        "Modern Art Movements",
+        "Digital & Contemporary",
+        "Pixel Art Styles",
+        "Film & Photography",
+        "Animation Styles",
+        "Video Game Aesthetics",
+        "Experimental/Abstract", 
+        "International Styles",
+        "Historical Periods", 
+        "Mixed Media",
+        "Textures & Materials",
+        "Lighting Techniques"
+    ]
+
+def prompt_for_visual_style():
+    """Prompt the user to select a visual style category and return it"""
+    print("\n--- Visual Style Selection ---")
+    print("Select a category for the visual style of your generated content:")
+    
+    categories = get_visual_style_categories()
+    for idx, category in enumerate(categories, 1):
+        print(f"{idx}. {category}")
+    
+    print("13. Random (let the system choose)")
+    
+    # Get user selection
+    while True:
+        try:
+            selection = input("\nEnter the number of your choice (1-13): ")
+            selection_num = int(selection)
+            if 1 <= selection_num <= 13:
+                if selection_num == 13:
+                    return None  # Random selection
+                else:
+                    return categories[selection_num - 1]
+            else:
+                print("Please enter a number between 1 and 13.")
+        except ValueError:
+            print("Please enter a valid number.")
+
 def main():
     parser = argparse.ArgumentParser(description="Generate prompts, create media, and merge them")
     parser.add_argument("--ffmpeg-path", help="Path to FFmpeg executable if not in PATH")
@@ -44,6 +88,7 @@ def main():
     parser.add_argument("--generate-music", action="store_true", help="Automatically generate music using CassetteAI API")
     parser.add_argument("--music-duration", type=int, default=6, help="Duration of music in seconds (default: 6)")
     parser.add_argument("--async", dest="use_async", action="store_true", help="Use async API for music generation")
+    parser.add_argument("--random-style", action="store_true", help="Skip visual style selection and use random style")
     args = parser.parse_args()
     
     # Create necessary directories
@@ -58,10 +103,23 @@ def main():
     video_prompt_file = os.path.join(prompts_dir, "video_prompt.txt")
     music_prompt_file = os.path.join(prompts_dir, "music_prompt.txt")
     
+    # Print welcome and feature info
+    print("\n=== Game Content Generator ===")
+    print("This tool creates unique game concept videos with matching audio")
+    if not args.skip_prompt_generation and not args.random_style:
+        print("\nNew Feature: You can now select a specific visual style category")
+        print("You'll be prompted to choose a category for your generated content")
+        print("Use --random-style to skip selection and use the default random choice")
+    
+    # Get visual style preference if generating prompts
+    visual_style = None
+    if not args.skip_prompt_generation and not args.random_style:
+        visual_style = prompt_for_visual_style()
+    
     # Step 1: Generate prompts
     if not args.skip_prompt_generation:
         print("Generating prompts...")
-        video_prompt, music_prompt = generate_prompts()
+        video_prompt, music_prompt = generate_prompts(visual_style_category=visual_style)
         
         if video_prompt and music_prompt:
             save_prompts_to_files(
@@ -121,6 +179,14 @@ def main():
     
     # Step 2b: Instructions for manual media generation
     print("\n--- Media Generation Steps ---")
+    if not args.skip_prompt_generation:
+        if args.random_style:
+            print("Visual Style: Random (system selected)")
+        elif visual_style:
+            print(f"Visual Style: {visual_style}")
+        else:
+            print("Visual Style: Random (user selected)")
+            
     if not args.generate_music:
         print("1. Use the video_prompt with your video generation tool to create an MP4 file")
         print("2. Use the music_prompt with your audio generation tool to create a WAV file")
