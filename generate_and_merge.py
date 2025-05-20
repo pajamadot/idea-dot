@@ -82,7 +82,7 @@ def prompt_for_visual_style():
             print("Please enter a valid number.")
 
 def main():
-    parser = argparse.ArgumentParser(description="Generate prompts, create media, and merge them")
+    parser = argparse.ArgumentParser(description="Generate anime dancing videos with beautiful music and social media captions")
     parser.add_argument("--ffmpeg-path", help="Path to FFmpeg executable if not in PATH")
     parser.add_argument("--skip-prompt-generation", action="store_true", help="Skip prompt generation and use existing files")
     parser.add_argument("--generate-music", action="store_true", help="Automatically generate music using CassetteAI API")
@@ -102,14 +102,16 @@ def main():
     
     video_prompt_file = os.path.join(prompts_dir, "video_prompt.txt")
     music_prompt_file = os.path.join(prompts_dir, "music_prompt.txt")
+    social_media_file = os.path.join(prompts_dir, "social_media_prompt.txt")
     
     # Print welcome and feature info
-    print("\n=== Game Content Generator ===")
-    print("This tool creates unique game concept videos with matching audio")
+    print("\n=== Anime Dancing Video Generator ===")
+    print("This tool creates beautiful anime girl dancing videos with emotional music and social media captions")
+    print("The content is designed to be visually appealing and emotionally moving")
     if not args.skip_prompt_generation and not args.random_style:
-        print("\nNew Feature: You can now select a specific visual style category")
+        print("\nYou can select a specific visual style category for your anime")
         print("You'll be prompted to choose a category for your generated content")
-        print("Use --random-style to skip selection and use the default random choice")
+        print("Use --random-style to skip selection and use the default anime styles")
     
     # Get visual style preference if generating prompts
     visual_style = None
@@ -119,14 +121,17 @@ def main():
     # Step 1: Generate prompts
     if not args.skip_prompt_generation:
         print("Generating prompts...")
-        video_prompt, music_prompt = generate_prompts(visual_style_category=visual_style)
+        # Use include_social=True to get all three prompts
+        video_prompt, music_prompt, social_media_prompt = generate_prompts(visual_style_category=visual_style, include_social=True)
         
-        if video_prompt and music_prompt:
+        if video_prompt and music_prompt and social_media_prompt:
             save_prompts_to_files(
                 video_prompt, 
-                music_prompt, 
+                music_prompt,
+                social_media_prompt,
                 video_prompt_file, 
-                music_prompt_file
+                music_prompt_file,
+                social_media_file
             )
         else:
             print("Failed to generate prompts. Exiting.")
@@ -139,8 +144,15 @@ def main():
                 video_prompt = f.read().strip()
             with open(music_prompt_file, 'r') as f:
                 music_prompt = f.read().strip()
+            try:
+                with open(social_media_file, 'r') as f:
+                    social_media_prompt = f.read().strip()
+            except FileNotFoundError:
+                social_media_prompt = "No social media caption available (file not found)"
+            
             print(f"Loaded existing video prompt: {video_prompt}")
             print(f"Loaded existing music prompt: {music_prompt}")
+            print(f"Loaded existing social media prompt: {social_media_prompt}")
         except FileNotFoundError:
             print("Warning: Could not find existing prompt files. Please run without --skip-prompt-generation first.")
             return
@@ -181,17 +193,17 @@ def main():
     print("\n--- Media Generation Steps ---")
     if not args.skip_prompt_generation:
         if args.random_style:
-            print("Visual Style: Random (system selected)")
+            print("Visual Style: Random (anime style selected)")
         elif visual_style:
             print(f"Visual Style: {visual_style}")
         else:
-            print("Visual Style: Random (user selected)")
+            print("Visual Style: Random (anime style selected)")
             
     if not args.generate_music:
-        print("1. Use the video_prompt with your video generation tool to create an MP4 file")
+        print("1. Use the video_prompt with your video generation tool to create a beautiful anime MP4 file")
         print("2. Use the music_prompt with your audio generation tool to create a WAV file")
     else:
-        print("1. Use the video_prompt with your video generation tool to create an MP4 file")
+        print("1. Use the video_prompt with your video generation tool to create a beautiful anime MP4 file")
         if music_file:
             print(f"2. Music already generated: {os.path.basename(music_file)}")
         else:
@@ -201,6 +213,16 @@ def main():
     print(f"4. Make sure your MP4 file is named with a '.mp4' extension")
     if not args.generate_music or not music_file:
         print(f"5. Make sure your WAV file is named with a '.wav' extension")
+        
+    # Display social media content
+    print("\n--- Social Media Content ---")
+    try:
+        with open(social_media_file, 'r') as f:
+            social_media_content = f.read().strip()
+            print(f"Caption/Poem for your content:\n\"{social_media_content}\"")
+            print("You can use this with your video when sharing on Twitter/social media")
+    except:
+        print("No social media content available")
     
     # Optional - wait for user to generate and place files
     user_input = input("\nPress Enter when you've placed the generated files in the input directory, or 'q' to quit: ")

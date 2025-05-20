@@ -15,7 +15,7 @@ async def generate_image_async(
     output_folder: str = "input",
     output_filename: str = "game_image.jpg",
     num_images: int = 1,
-    enable_safety_checker: bool = True,
+    enable_safety_checker: bool = False,
     safety_tolerance: str = "2",
     output_format: str = "jpeg",
     aspect_ratio: str = "16:9"
@@ -73,22 +73,15 @@ async def generate_video_async(
     prompt: str = "",
     output_folder: str = "input",
     output_filename: str = "game_video.mp4",
-    negative_prompt: str = "worst quality, inconsistent motion, blurry, jittery, distorted, low resolution, bad composition, poor lighting, unrealistic physics, artificial movement",
-    num_frames: int = 81,
-    frames_per_second: int = 16,
-    resolution: str = "720p",
-    num_inference_steps: int = 30,
-    guide_scale: int = 5,
-    shift: int = 5,
-    enable_safety_checker: bool = True,
-    enable_prompt_expansion: bool = False,
-    acceleration: str = "regular",
-    aspect_ratio: str = "auto"
+    negative_prompt: str = "blur, distort, and low quality",
+    duration: str = "5",
+    aspect_ratio: str = "16:9",
+    cfg_scale: float = 0.5
 ) -> Optional[str]:
     """
-    Generate video from an image using Wan-2.1 Image-to-Video API and download it to the specified folder.
+    Generate video from an image using Kling 2.0 Master Image to Video API and download it to the specified folder.
     """
-    print(f"Generating video from image: {image_url}")
+    print(f"Generating video from image using Kling 2.0 Master API: {image_url}")
     print(f"Video prompt: {prompt}")
     os.makedirs(output_folder, exist_ok=True)
     fal_key = os.getenv("FAL_KEY")
@@ -97,22 +90,18 @@ async def generate_video_async(
         return None
 
     try:
+        print("Waiting for Kling 2.0 to generate video (this may take several minutes)...")
+        
+        # Use run_async instead of submit_async for simplicity
         result = await fal_client.run_async(
-            "fal-ai/wan-i2v",
+            "fal-ai/kling-video/v2/master/image-to-video",
             arguments={
                 "prompt": prompt,
-                "negative_prompt": negative_prompt,
                 "image_url": image_url,
-                "num_frames": num_frames,
-                "frames_per_second": frames_per_second,
-                "resolution": resolution,
-                "num_inference_steps": num_inference_steps,
-                "guide_scale": guide_scale,
-                "shift": shift,
-                "enable_safety_checker": enable_safety_checker,
-                "enable_prompt_expansion": enable_prompt_expansion,
-                "acceleration": acceleration,
-                "aspect_ratio": aspect_ratio
+                "duration": duration,
+                "aspect_ratio": aspect_ratio,
+                "negative_prompt": negative_prompt,
+                "cfg_scale": cfg_scale
             }
         )
         
@@ -144,9 +133,9 @@ async def generate_game_video_async(
     video_filename: str = "game_video.mp4"
 ) -> Optional[str]:
     """
-    Two-stage process: 
-    1. Generate an image from a prompt
-    2. Generate a video from that image
+    Two-stage process using Kling 2.0 Master API: 
+    1. Generate an image from a prompt using FLUX-Pro Ultra
+    2. Generate a video from that image using Kling 2.0 Master Image to Video API
     """
     print(f"\n=== Stage 1: Generating Image from Prompt ===")
     image_result = await generate_image_async(
@@ -175,14 +164,15 @@ async def generate_game_video_async(
 
 def generate_video_from_prompt_file(
     prompt_file: str,
-    duration: str = "10",
-    negative_prompt: str = "worst quality, inconsistent motion, blurry, jittery, distorted, low resolution, bad composition, poor lighting, unrealistic physics, artificial movement",
+    duration: str = "5",
+    negative_prompt: str = "blur, distort, and low quality",
     cfg_scale: float = 0.5,
+    aspect_ratio: str = "16:9",
     output_folder: str = "input",
     output_filename: str = "game_video.mp4"
 ) -> Optional[str]:
     """
-    Read a video prompt from a file and generate video using it (async).
+    Read a video prompt from a file and generate video using it with Kling 2.0 Master API (async).
     """
     try:
         with open(prompt_file, 'r') as f:
@@ -214,12 +204,14 @@ async def async_main():
 
     The final shot shows a massive space elevator in the distance, its base surrounded by swirling clouds of steam and energy, while the top disappears into the aurora-lit clouds. The entire sequence is rendered in photorealistic detail with dynamic lighting, atmospheric effects, and smooth camera movements. 4K resolution, cinematic color grading, and professional cinematography.
     """
-    print("\n=== Testing Two-Stage Video Generation ===")
+    print("\n=== Testing Two-Stage Video Generation with Kling 2.0 Master API ===")
+    print("This process may take several minutes to complete as Kling 2.0 produces high-quality videos")
     output_file = await generate_game_video_async(test_prompt)
     
     prompt_file = "prompts/video_prompt.txt"
     if os.path.exists(prompt_file):
-        print("\n=== Testing Two-Stage Video Generation with Prompt File ===")
+        print("\n=== Testing Two-Stage Video Generation with Custom Prompt File ===")
+        print("Using Kling 2.0 Master Image to Video API for higher quality results")
         with open(prompt_file, 'r') as f:
             file_prompt = f.read().strip()
         if file_prompt:
@@ -231,7 +223,7 @@ async def async_main():
         print("You can create this file by running generate_and_merge.py first")
     
     if output_file:
-        print("\nSuccess! Two-stage video generation complete.")
+        print("\nSuccess! Two-stage video generation with Kling 2.0 Master API complete.")
         print(f"Generated file: {output_file}")
         print("You can now use merge_audio_video.py to combine this with audio")
     else:

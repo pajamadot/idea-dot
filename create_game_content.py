@@ -19,63 +19,48 @@ FINAL_FILENAME = "final_game_content.mp4"
 
 async def generate_twitter_content(video_prompt: str, music_prompt: str) -> str:
     """
-    Generate engaging Twitter content using GPT-4.
+    Generate beautiful, poetic Twitter content using GPT-4.
     """
     client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
     
     prompt = f"""
-    Create a viral-worthy, slightly controversial tweet about this game concept:
+    Create a beautiful, poetic tweet about this enchanting anime dancing scene:
     Video: {video_prompt}
     Music: {music_prompt}
     
     Requirements:
     1. Keep it under 280 characters for the main tweet body
-    2. Start with a strong, attention-grabbing hook that might be slightly controversial
-    3. Create emotional engagement through:
-       - Provocative questions
-       - Bold statements
-       - Industry challenges
-       - Future predictions
-    4. Include a clear call-to-action that encourages debate (e.g., "Would you play this?", "Drop a ❤️ if you want to try this", "RT if you think this is the future of gaming")
-    5. Add 3-5 relevant emojis to enhance readability and engagement
-    6. Include AT LEAST 20 strategic hashtags in this format:
-       <Tweet body>
+    2. Create a purely poetic, emotionally evocative mini-story (3-5 lines)
+    3. Focus on beauty, emotion, and artistic expression
+    4. Include delicate, beautiful imagery related to the dancing scene
+    5. Add 3-5 elegant emojis that enhance the poetic mood (like ✨🌸💫🌙💖)
+    6. Include the following REQUIRED hashtags, plus a few additional aesthetic ones:
+       <Poetic mini-story>
        <Line break>
-       #hashtag1 #hashtag2 #hashtag3 ...
+       #Catgirl #AnimeGirl #Kawaii #Cosplay #AnimeArt #MangaArt #CuteOverload #Aesthetic #FantasyArt #DigitalArt #AIart #AI美女 #AI美少女 #AIGC
+       <Plus 3-6 additional aesthetic tags>
        
-    Include the following categories of hashtags:
-       - REQUIRED: #AIGeneratedGameplay
-       - GAMING INDUSTRY (5-6): #gamedev #indiegame #gamedevelopment #gamingcommunity #esports #VGdevelopment
-       - GAMING PLATFORMS (3-4): #PCgaming #mobilegaming #consolegaming #PlayStation #Xbox #NintendoSwitch
-       - GAMING GENRES (3-4): #RPG #FPS #strategy #openworld #simulation #adventure #sportsGame
-       - TECH & AI (3-4): #AI #ArtificialIntelligence #MachineLearning #AIArt #AIgames #tech #futuretech
-       - VIRAL & TRENDING (3-4): #viral #trending #insane #mindblowing #nextlevel #epicgaming
-       - EMOTIONS & REACTIONS (2-3): #stunning #mindblowing #gorgeous #awesome #epicwin
-       - CALL TO ACTION (1-2): #MustPlay #MustSee #CheckThisOut #RT
+    Additional hashtag categories you can choose from:
+       - CHARACTER & EMOTION: #AnimeAesthetic #KawaiiMoment #DancingAnime
+       - ART & BEAUTY: #BeautifulAnime #AnimeBeauty #AnimeLove
+       - MOOD & FEELING: #AnimeVibes #AnimeFeels #EmotionalAnime #AnimeWonder
+       - AESTHETIC & VISUAL: #AnimeEdit #AnimeScene #AnimeVisual #AnimeMood
 
     Format:
-       <Controversial hook>
-       <Emotional engagement>
-       <Call to action>
+       <Poetic mini-story - 3-5 lines>
        <Line break>
-       #hashtag1 #hashtag2 #hashtag3 ... (at least 20 hashtags)
+       #Catgirl #AnimeGirl #Kawaii #Cosplay #AnimeArt #MangaArt #CuteOverload #Aesthetic #FantasyArt #DigitalArt #AIart #AI美女 #AI美少女 #AIGC <plus additional aesthetic hashtags>
 
-    Controversial Elements (use 1-2):
-    - Challenge industry norms
-    - Question traditional game design
-    - Suggest revolutionary changes
-    - Compare to existing games
-    - Make bold predictions
-    - Address current gaming controversies
+    NOTE: This is purely artistic content. Do NOT mention games, gaming, gameplay, or anything related to the gaming industry. Focus ONLY on the beauty, emotion, and poetic aspects of the anime dancing scene. Make sure ALL the required hashtags are included exactly as written.
     """
     
     response = client.chat.completions.create(
         model="gpt-4-turbo",
         messages=[
-            {"role": "system", "content": "You are a viral game content strategist and copywriter for an AI-driven game studio. Your tweets are known for their high engagement rates and ability to go viral through slightly controversial but thought-provoking content. You excel at creating emotionally resonant content that makes viewers stop scrolling and engage in discussion. You're not afraid to challenge industry norms while maintaining professionalism. You're an expert at hashtag strategy and know exactly which gaming hashtags are trending and will maximize engagement."},
+            {"role": "system", "content": "You are a highly talented poet specializing in creating emotionally resonant, beautiful content about anime art. You craft exquisite poetic mini-stories that capture the essence and beauty of anime visuals. Your writing evokes deep emotions and aesthetic appreciation through elegant, refined language. You excel at creating content that makes viewers pause, feel, and connect with the artistic beauty of anime dancing scenes. Your tweets are purely focused on artistic beauty and emotional resonance, never referencing games or gaming content."},
             {"role": "user", "content": prompt}
         ],
-        temperature=0.9,  # Increased temperature for more creative variations
+        temperature=0.9,  # High temperature for poetic creativity
     )
     
     return response.choices[0].message.content.strip()
