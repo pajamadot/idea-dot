@@ -141,7 +141,9 @@ async def generate_game_video_async(
     image_result = await generate_image_async(
         prompt=prompt,
         output_folder=output_folder,
-        output_filename=image_filename
+        output_filename=image_filename,
+        enable_safety_checker=False,
+        safety_tolerance="6"
     )
     
     if not image_result:
