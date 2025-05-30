@@ -73,20 +73,22 @@ async def generate_video_async(
     prompt: str = "",
     output_folder: str = "input",
     output_filename: str = "game_video.mp4",
-    negative_prompt: str = "worst quality, inconsistent motion, blurry, jittery, distorted, low resolution, bad composition, poor lighting, unrealistic physics, artificial movement",
-    num_frames: int = 81,
-    frames_per_second: int = 16,
-    resolution: str = "720p",
-    num_inference_steps: int = 30,
-    guide_scale: int = 5,
-    shift: int = 5,
-    enable_safety_checker: bool = True,
-    enable_prompt_expansion: bool = False,
-    acceleration: str = "regular",
-    aspect_ratio: str = "auto"
+    negative_prompt: str = "blur, distort, and low quality",
+    duration: str = "10",  # "5" or "10"
+    aspect_ratio: str = "16:9",  # "16:9", "9:16", or "1:1"
+    cfg_scale: float = 0.5,  # Classifier Free Guidance scale
+    num_frames: int = 81,  # Keep for backward compatibility (not used with Kling)
+    frames_per_second: int = 16,  # Keep for backward compatibility (not used with Kling)
+    resolution: str = "720p",  # Keep for backward compatibility (not used with Kling)
+    num_inference_steps: int = 30,  # Keep for backward compatibility (not used with Kling)
+    guide_scale: int = 5,  # Keep for backward compatibility (not used with Kling)
+    shift: int = 5,  # Keep for backward compatibility (not used with Kling)
+    enable_safety_checker: bool = True,  # Keep for backward compatibility (not used with Kling)
+    enable_prompt_expansion: bool = False,  # Keep for backward compatibility (not used with Kling)
+    acceleration: str = "regular",  # Keep for backward compatibility (not used with Kling)
 ) -> Optional[str]:
     """
-    Generate video from an image using Wan-2.1 Image-to-Video API and download it to the specified folder.
+    Generate video from an image using Kling 2.1 Master Image-to-Video API and download it to the specified folder.
     """
     print(f"Generating video from image: {image_url}")
     print(f"Video prompt: {prompt}")
@@ -98,21 +100,14 @@ async def generate_video_async(
 
     try:
         result = await fal_client.run_async(
-            "fal-ai/wan-i2v",
+            "fal-ai/kling-video/v2.1/master/image-to-video",
             arguments={
                 "prompt": prompt,
-                "negative_prompt": negative_prompt,
                 "image_url": image_url,
-                "num_frames": num_frames,
-                "frames_per_second": frames_per_second,
-                "resolution": resolution,
-                "num_inference_steps": num_inference_steps,
-                "guide_scale": guide_scale,
-                "shift": shift,
-                "enable_safety_checker": enable_safety_checker,
-                "enable_prompt_expansion": enable_prompt_expansion,
-                "acceleration": acceleration,
-                "aspect_ratio": aspect_ratio
+                "duration": duration,
+                "aspect_ratio": aspect_ratio,
+                "negative_prompt": negative_prompt,
+                "cfg_scale": cfg_scale
             }
         )
         
@@ -175,11 +170,12 @@ async def generate_game_video_async(
 
 def generate_video_from_prompt_file(
     prompt_file: str,
-    duration: str = "10",
-    negative_prompt: str = "worst quality, inconsistent motion, blurry, jittery, distorted, low resolution, bad composition, poor lighting, unrealistic physics, artificial movement",
+    duration: str = "5",
+    negative_prompt: str = "blur, distort, and low quality",
     cfg_scale: float = 0.5,
     output_folder: str = "input",
-    output_filename: str = "game_video.mp4"
+    output_filename: str = "game_video.mp4",
+    aspect_ratio: str = "16:9"
 ) -> Optional[str]:
     """
     Read a video prompt from a file and generate video using it (async).

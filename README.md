@@ -6,7 +6,7 @@ A complete workflow for creating and sharing AI-generated game concepts with vir
 
 - **Two-Stage Video Generation**: 
   - Creates high-quality images using FLUX-Pro Ultra API
-  - Animates those images into videos using Wan-2.1 Image-to-Video API
+  - Animates those images into videos using Kling 2.1 Image-to-Video API
 - **Music Generation**: Produces unique game soundtracks using CassetteAI
 - **Viral Social Media Content**: Generates attention-grabbing tweets with strategic hashtags
 - **Wide Visual Style Variety**: Supports 100+ visual styles across 12 categories
@@ -114,7 +114,7 @@ python create_game_content.py
 This will:
 1. Generate creative game concept prompts
 2. Generate a high-quality game image using FLUX-Pro Ultra
-3. Animate that image into a video using Wan-2.1
+3. Animate that image into a video using Kling 2.1
 4. Generate matching game music
 5. Merge the video and audio
 6. Create a viral tweet for sharing
@@ -187,15 +187,13 @@ The system uses FAL.ai's FLUX-Pro Ultra API to generate high-quality images with
 - Safety features: Enabled
 - Format: JPEG
 
-### Video Generation (Wan-2.1)
+### Video Generation (Kling 2.1)
 
-The system animates images into videos using FAL.ai's Wan-2.1 Image-to-Video API:
-- Frame rate: 16 FPS
-- Number of frames: 81 (5 seconds)
-- Resolution: 720p
-- Inference steps: 30
-- Guide scale: 5
-- Shift: 5
+The system animates images into videos using FAL.ai's Kling 2.1 Image-to-Video API:
+- Duration: 5 or 10 seconds
+- Supported aspect ratios: 16:9, 9:16, 1:1
+- High-quality professional output
+- CFG scale for fine-tuning (default: 0.5)
 
 ### Music Generation
 
@@ -243,10 +241,46 @@ The system creates log files in the project directory:
 This project uses the following APIs:
 - [OpenAI API](https://openai.com/blog/openai-api) for prompt and tweet generation
 - [FLUX-Pro Ultra on FAL.ai](https://fal.ai/models/fal-ai/flux-pro/v1.1-ultra/api) for image generation
-- [Wan-2.1 on FAL.ai](https://fal.ai/models/fal-ai/wan-i2v/api) for image-to-video conversion
+- [Kling 2.1 on FAL.ai](https://fal.ai/models/fal-ai/kling-video/v2.1/master/image-to-video/api) for image-to-video conversion
 - [CassetteAI on FAL.ai](https://fal.ai/models/cassetteai/music-generator/api) for music generation
 - [Twitter API](https://developer.twitter.com/en/docs/twitter-api) for social media posting
 
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Video Generation
+
+The video generation module now uses the **Kling 2.1 Master Image-to-Video API** for superior quality video generation. The process involves:
+
+1. **Image Generation**: First generates a high-quality image using FLUX-Pro Ultra API
+2. **Video Generation**: Converts the generated image into a video using Kling 2.1 API
+
+### Kling 2.1 API Features
+
+The Kling 2.1 API offers:
+- **Duration Options**: 5 or 10 seconds
+- **Aspect Ratios**: 16:9, 9:16, or 1:1
+- **High Quality Output**: Professional-grade video generation
+- **Prompt Control**: Fine control over video content with CFG scale adjustment
+
+### Video Generation Parameters
+
+- `duration`: "5" or "10" (seconds)
+- `aspect_ratio`: "16:9", "9:16", or "1:1"  
+- `cfg_scale`: Classifier Free Guidance scale (default: 0.5)
+- `negative_prompt`: Default is "blur, distort, and low quality"
+
+### API Requirements
+
+The Kling 2.1 API requires:
+- `FAL_KEY` environment variable set with your API key
+- `fal-client` package (>=0.5.0)
+
+## APIs Used
+
+This project integrates with several cutting-edge AI APIs:
+
+- [FLUX-Pro Ultra on FAL.ai](https://fal.ai/models/fal-ai/flux-pro/v1.1-ultra/api) for ultra-high-quality image generation
+- [Kling 2.1 on FAL.ai](https://fal.ai/models/fal-ai/kling-video/v2.1/master/image-to-video/api) for professional image-to-video conversion
+- [Open-Sora on FAL.ai](https://fal.ai/models/fal-ai/open-sora/text-to-video/api) for text-to-video generation
